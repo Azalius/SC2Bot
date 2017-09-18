@@ -1,4 +1,3 @@
-@echo off
 git init
 git add *.*
 set /p VAR_Saisie=    Message commit : 
