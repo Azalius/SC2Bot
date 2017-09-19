@@ -129,7 +129,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="botmain.cpp" />
+    <ClCompile Include="macro.cpp" />
+    <ClCompile Include="macroRessources.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="micro.cpp" />
     <ClCompile Include="utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
