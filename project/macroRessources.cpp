@@ -1,3 +1,4 @@
+#pragma once
 #include "botHeader.h"
 
 using namespace sc2;
@@ -10,7 +11,7 @@ Unit Bot::trouveUnPeon(UNIT_TYPEID peon = UNIT_TYPEID::TERRAN_SCV) {
 		}
 	}
 }
-void addGaz() {
+void Bot::addGaz(Tag tag) {
 	/*TODO*/
 }
 int Bot::isBuilding(UNIT_TYPEID unit = UNIT_TYPEID::TERRAN_BARRACKS) {
@@ -113,4 +114,45 @@ Point2D Bot::trouveOuConstruire(ABILITY_ID bat, Unit vcs) {
 		}
 		return laQueJeConstrui;
 	}
+}
+void Bot::batBuildVcs() {
+	if (!fileAttBat.empty() && vcsWantBuild == 0 && Observation()->GetMinerals() > nbMineralsBougerVcs(fileAttBat.front())) {
+		vcsWantBuild++;
+		Unit vcs = trouveUnPeon();
+		Actions()->UnitCommand(vcs, ABILITY_ID::MOVE, trouveOuConstruire(fileAttBat.front(), vcs));
+		vcsKiBossent[vcs.tag] = fileAttBat.front();
+		fileAttBat.pop();
+	}
+}
+void Bot::batBuildDo() {
+	for (Tag bran : branleur) {
+		vcsKiBossent.erase(bran);
+	}
+	branleur.clear();
+	for (auto& vcs : vcsKiBossent) {
+		if (Observation()->GetUnit(vcs.first) != 0 && Observation()->GetUnit(vcs.first)->orders.empty()) {
+			if (vcs.second == ABILITY_ID::BUILD_REFINERY) {
+				addGaz(vcs.first);
+			}
+			else {
+				Actions()->UnitCommand(vcs.first, vcs.second, Observation()->GetUnit(vcs.first)->pos);
+			}
+		}
+		else if (Observation()->GetUnit(vcs.first) != 0 && Observation()->GetUnit(vcs.first)->orders.front().ability_id == vcs.second) {
+			branleur.push_front(vcs.first);
+			vcsWantBuild--;
+		}
+	}
+}
+int Bot::nbMineralsBougerVcs(ABILITY_ID bat) {
+	if (bat == ABILITY_ID::BUILD_REFINERY) {
+		return 50;
+	}
+	if (bat == ABILITY_ID::BUILD_BARRACKS) {
+		return 110;
+	}
+	if (bat == ABILITY_ID::BUILD_SUPPLYDEPOT) {
+		return 80;
+	}
+	return 100;
 }

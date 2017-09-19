@@ -1,10 +1,11 @@
+#pragma once
 #include "botHeader.h"
 
 using namespace sc2;
 /*All*/
 
 /*Reaper*/
-bool estDevant(Unit unit) {
+bool Bot::estDevant(Unit unit) {
 	Point2D ennemy = getNearestEnnemy(locatePack()).pos;
 	int nbUnitPlusProche = 0;
 	for (Unit reaper : faucheur) {
@@ -109,7 +110,7 @@ bool Bot::fautMine(UNIT_TYPEID cible) {
 /*Banshee*/
 
 bool Bot::estMenace(Unit banshee) {
-
+	return false;
 }
 void Bot::runFromDetection(Unit banshee) {
 

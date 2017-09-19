@@ -1,4 +1,7 @@
 #pragma once
+#ifndef HEADE
+#define HEADE
+
 #include <sc2api/sc2_api.h>
 #include <iostream>
 #include <queue>
@@ -10,10 +13,12 @@
 
 #define PACK_MIN 4
 
-std::queue<ABILITY_ID> fileAttBat;
-std::map<Tag, ABILITY_ID> vcsKiBossent;
-std::list<Tag> branleur;
-std::list<Unit> faucheur;
+using namespace sc2;
+
+extern std::queue<ABILITY_ID> fileAttBat;
+extern std::map<Tag, ABILITY_ID> vcsKiBossent;
+extern std::list<Tag> branleur;
+extern std::list<Unit> faucheur;
 
 class Bot : public Agent {
 public:
@@ -22,16 +27,16 @@ public:
 	virtual void OnUnitIdle(const Unit& unit) final;
 private:
 	
+	void addGaz(Tag vcs);
 	int skipPourPeon = 0;
 	int vcsWantBuild = 0;
 	bool allRaxBusy();
 	void BO();
 	void macro();
-	Unit trouveUnPeon(UNIT_TYPEID peon = UNIT_TYPEID::TERRAN_SCV);
+	Unit trouveUnPeon(UNIT_TYPEID peon);
 	void peonGaz();
 	int CountUnitType(UNIT_TYPEID unit_type);
-	bool TryBuildStructure(ABILITY_ID BatABuild, UNIT_TYPEID unit_type = UNIT_TYPEID::TERRAN_SCV);
-	int isBuilding(UNIT_TYPEID unit = UNIT_TYPEID::TERRAN_BARRACKS);
+	int isBuilding(UNIT_TYPEID unit);
 	int SupBuilding();
 	bool estDevant(Unit unit);
 	void reaper();
@@ -64,5 +69,4 @@ private:
 	bool isPeonBusy(Tag tag);
 };
 
-
-
+#endif 

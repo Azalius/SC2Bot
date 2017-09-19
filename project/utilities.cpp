@@ -1,3 +1,4 @@
+#pragma once
 #include "botHeader.h"
 
 using namespace sc2;
@@ -43,4 +44,44 @@ bool Bot::sharePosWithRef(Unit u) {
 		}
 	}
 	return false;
+}
+Unit Bot::getNearest(Point2D unite, UNIT_TYPEID type) {
+	Unit proche;
+	Units units = Observation()->GetUnits();
+	float distance = std::numeric_limits<float>::max();
+	for (const auto& u : units) {
+		if (u.unit_type == type) {
+			float d = DistanceSquared2D(unite, u.pos);
+			if (d < distance) {
+				distance = d;
+				proche = u;
+			}
+		}
+	}
+	return proche;
+}
+Unit Bot::getNearestEnnemy(Point2D unite) {
+	Unit proche;
+	Units units = Observation()->GetUnits();
+	float distance = std::numeric_limits<float>::max();
+	for (const auto& u : units) {
+		if (u.alliance == Unit::Alliance::Enemy) {
+			float d = DistanceSquared2D(unite, u.pos);
+			if (d < distance) {
+				distance = d;
+				proche = u;
+			}
+		}
+	}
+	return proche;
+}
+float Bot::attackrange(Unit unit) {
+	return 5;
+}
+bool Bot::isPeonBusy(Tag tag) {
+	if (Observation()->GetUnit(tag)->orders.size() == 0) {
+		return false;
+	}
+	std::string cible = Observation()->GetUnit(tag)->orders.front().ability_id.to_string();
+	return vcsKiBossent.count(tag) == 0 && (cible != "3666" && cible != "3667");
 }

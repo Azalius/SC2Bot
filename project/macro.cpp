@@ -1,3 +1,4 @@
+#pragma once
 #include "botHeader.h"
 
 using namespace sc2;
@@ -58,7 +59,7 @@ void Bot::peonGaz() {
 	Units toute = Observation()->GetUnits(Unit::Alliance::Self);
 	for (Unit peon : toute) {
 		if (peon.unit_type == UNIT_TYPEID::TERRAN_REFINERY && peon.build_progress == 1 && peon.ideal_harvesters - peon.assigned_harvesters > 0 && skipPourPeon < 0) {
-			Actions()->UnitCommand(trouveUnPeon(), ABILITY_ID::HARVEST_GATHER, peon);
+			Actions()->UnitCommand(trouveUnPeon(UNIT_TYPEID::TERRAN_SCV), ABILITY_ID::HARVEST_GATHER, peon);
 			skipPourPeon = 10;
 		}
 

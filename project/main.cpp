@@ -1,6 +1,6 @@
+#pragma once
 #include "botHeader.h"
-#include "botHeader.h"
-#include "botmain.cpp"
+//#include "botmain.cpp"
 using namespace sc2;
 
 #define TRUESPEED true
