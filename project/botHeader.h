@@ -27,7 +27,7 @@ public:
 	virtual void OnUnitIdle(const Unit& unit) final;
 private:
 	
-	void addGaz(Tag vcs);
+	void addGaz(Unit peon);
 	int skipPourPeon = 0;
 	int vcsWantBuild = 0;
 	bool allRaxBusy();

@@ -11,8 +11,9 @@ Unit Bot::trouveUnPeon(UNIT_TYPEID peon = UNIT_TYPEID::TERRAN_SCV) {
 		}
 	}
 }
-void Bot::addGaz(Tag tag) {
-	/*TODO*/
+void Bot::addGaz(Unit peon) {
+	Unit gazToAdd = getNearest(peon.pos, UNIT_TYPEID::NEUTRAL_VESPENEGEYSER);
+	Actions()->UnitCommand(peon, ABILITY_ID::BUILD_REFINERY, gazToAdd);
 }
 int Bot::isBuilding(UNIT_TYPEID unit = UNIT_TYPEID::TERRAN_BARRACKS) {
 	int nbBat = 0;
@@ -132,7 +133,9 @@ void Bot::batBuildDo() {
 	for (auto& vcs : vcsKiBossent) {
 		if (Observation()->GetUnit(vcs.first) != 0 && Observation()->GetUnit(vcs.first)->orders.empty()) {
 			if (vcs.second == ABILITY_ID::BUILD_REFINERY) {
-				addGaz(vcs.first);
+				const Unit*cepeon ;
+				cepeon = Observation()->GetUnit(vcs.first);
+				addGaz(*cepeon);
 			}
 			else {
 				Actions()->UnitCommand(vcs.first, vcs.second, Observation()->GetUnit(vcs.first)->pos);

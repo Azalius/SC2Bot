@@ -23,7 +23,8 @@ using namespace sc2;
 		reaper();
 		peonGaz();
 		if (Observation()->GetFoodCap() - Observation()->GetFoodUsed() <= 3 && Observation()->GetFoodUsed() >= 16) {
-			//TODO
+			Unit buildingPeon = trouveUnPeon(UNIT_TYPEID::TERRAN_SCV);
+			Actions()->UnitCommand(buildingPeon, ABILITY_ID::BUILD_SUPPLYDEPOT, trouveOuConstruire(ABILITY_ID::BUILD_SUPPLYDEPOT, buildingPeon));
 		}
 	}
 	 void Bot::OnUnitIdle(const Unit& unit) {
@@ -35,7 +36,7 @@ using namespace sc2;
 			break;
 		}
 		case UNIT_TYPEID::TERRAN_SCV: {
-			/*TODO*/
+			Actions()->UnitCommand(unit, ABILITY_ID::SMART, getNearest(unit.pos, UNIT_TYPEID::NEUTRAL_MINERALFIELD));
 		}
 		default: {
 			break;
