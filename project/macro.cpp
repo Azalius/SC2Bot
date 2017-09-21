@@ -14,16 +14,37 @@ void Bot::BO() {
 	fileAttBat.push(ABILITY_ID::BUILD_COMMANDCENTER);
 	fileAttBat.push(ABILITY_ID::BUILD_STARPORT);
 }
-bool Bot::allRaxBusy() { // not working
-	Units toute = Observation()->GetUnits(Unit::Alliance::Self, IsUnit(UNIT_TYPEID::TERRAN_BARRACKS));
-	for (Unit racks : toute) {
-		if (racks.orders.size() == 0 && racks.build_progress == 1.0) {
-			return false;
+void Bot::macro() {
+	macroEco();
+	macroBat();
+	reaper();
+	peonGaz();
+	macroSupply();
+}
+void Bot::macroEco() {
+	if (makeMorePeon()) {
+		for (Unit cc : getAll(UNIT_TYPEID::TERRAN_COMMANDCENTER)) { // TODO somtimes PF
+			if (cc.orders.size() == 0) {
+				Actions()->UnitCommand(cc, ABILITY_ID::TRAIN_SCV);
+			}
+		}
+		for (Unit cc : getAll(UNIT_TYPEID::TERRAN_ORBITALCOMMAND)) {
+			if (cc.orders.size() == 0) {
+				Actions()->UnitCommand(cc, ABILITY_ID::TRAIN_SCV);
+			}
 		}
 	}
-	return !CountUnitType(UNIT_TYPEID::TERRAN_BARRACKS);
+	for (Unit cc : getAll(UNIT_TYPEID::TERRAN_COMMANDCENTER)) {
+		Actions()->UnitCommand(cc, ABILITY_ID::MORPH_ORBITALCOMMAND); // TODO somtimes PF
+	}
 }
-void Bot::macro() {
+void Bot::macroSupply() {//TODO
+	/*if (Observation()->GetFoodCap() - Observation()->GetFoodUsed() >= 4) {
+		Unit peon = trouveUnPeon(UNIT_TYPEID::TERRAN_SCV);
+		Actions()->UnitCommand(peon, ABILITY_ID::BUILD_SUPPLYDEPOT, trouveOuConstruire(ABILITY_ID::BUILD_SUPPLYDEPOT, peon));
+	}*/
+}
+void Bot::macroBat() {
 	if (Observation()->GetUnits(Unit::Alliance::Self, IsUnit(UNIT_TYPEID::TERRAN_FACTORY)).size() != 0 && Observation()->GetUnits(Unit::Alliance::Self, IsUnit(UNIT_TYPEID::TERRAN_FACTORY)).front().build_progress == 1.0) {
 		Unit facto = Observation()->GetUnits(Unit::Alliance::Self, IsUnit(UNIT_TYPEID::TERRAN_FACTORY)).front();
 		if (facto.add_on_tag == 0) {
@@ -71,4 +92,13 @@ void Bot::reaper() {
 			Actions()->UnitCommand(rax, ABILITY_ID::TRAIN_REAPER);
 		}
 	}
+}
+bool Bot::allRaxBusy() { // not working
+	Units toute = Observation()->GetUnits(Unit::Alliance::Self, IsUnit(UNIT_TYPEID::TERRAN_BARRACKS));
+	for (Unit racks : toute) {
+		if (racks.orders.size() == 0 && racks.build_progress == 1.0) {
+			return false;
+		}
+	}
+	return !CountUnitType(UNIT_TYPEID::TERRAN_BARRACKS);
 }

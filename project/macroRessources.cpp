@@ -47,15 +47,13 @@ Point2D Bot::ouPlacerCC(Unit minerai) {
 		}
 	}
 	avrMiner /= nbminerals;
-	int limite = 10;
 	float distance = std::numeric_limits<float>::max();
 	Point2D laOuTuPeux;
-	for (int i = avrMiner.x - limite; i < avrMiner.x + limite; i++) {
-		for (int j = avrMiner.y - limite; j < avrMiner.y + limite; j++) {
+	for (int i = avrMiner.x - LIMITEDISTACEBUILD ; i < avrMiner.x + LIMITEDISTACEBUILD; i++) {
+		for (int j = avrMiner.y - LIMITEDISTACEBUILD ; j < avrMiner.y + LIMITEDISTACEBUILD; j++) {
 			if (Query()->Placement(ABILITY_ID::BUILD_COMMANDCENTER, Point2D(i, j)) && Query()->PathingDistance(avrMiner, Point2D(i, j)) < distance) {
 				laOuTuPeux = Point2D(i, j);
 				distance = Query()->PathingDistance(avrMiner, Point2D(i, j));
-				std::cout << "f u " << i << " " << j << std::endl;
 			}
 		}
 	}
@@ -78,7 +76,6 @@ Point2D Bot::trouveOuConstruire(ABILITY_ID bat, Unit vcs) {
 		return proche.pos;
 	}
 	else if (bat == ABILITY_ID::BUILD_COMMANDCENTER) {
-		std::cout << "Tkt je vais faire ca" << std::endl;
 		Unit pluspres;
 		float distance = std::numeric_limits<float>::max();
 		for (Unit minerai : Observation()->GetUnits(Unit::Alliance::Neutral, IsUnit(UNIT_TYPEID::NEUTRAL_MINERALFIELD))) {
@@ -133,9 +130,7 @@ void Bot::batBuildDo() {
 	for (auto& vcs : vcsKiBossent) {
 		if (Observation()->GetUnit(vcs.first) != 0 && Observation()->GetUnit(vcs.first)->orders.empty()) {
 			if (vcs.second == ABILITY_ID::BUILD_REFINERY) {
-				const Unit*cepeon ;
-				cepeon = Observation()->GetUnit(vcs.first);
-				addGaz(*cepeon);
+				addGaz(getUnit(vcs.first));
 			}
 			else {
 				Actions()->UnitCommand(vcs.first, vcs.second, Observation()->GetUnit(vcs.first)->pos);
@@ -158,4 +153,7 @@ int Bot::nbMineralsBougerVcs(ABILITY_ID bat) {
 		return 80;
 	}
 	return 100;
+}
+bool Bot::makeMorePeon() { //TODO
+	return getAll(UNIT_TYPEID::TERRAN_BARRACKS).size() == 0 || getAll(UNIT_TYPEID::TERRAN_COMMANDCENTER).size() == 0;
 }

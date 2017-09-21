@@ -2,9 +2,32 @@
 #include "botHeader.h"
 
 using namespace sc2;
+
 /*All*/
+void Bot::micro() {
+	microReaper();
+	microBanshee();
+}
+int Bot::nbEnnemyNear(Unit unit, float distancemax) {
+	int nbEnn = 0;
+	for (Unit unite : Observation()->GetUnits(Unit::Alliance::Enemy)) {
+		if (!(estBatiment(unite.unit_type) && Distance2D(unite.pos, unit.pos) < distancemax)) {
+			nbEnn++;
+		}
+	}
+	return nbEnn;
+}
+bool Bot::isBeingSurrounded(Unit unit) { //improve
+	return !(nbEnnemyNear(unit, 1) < NBUNITTOBESURROUNDED);
+}
 
 /*Reaper*/
+bool Bot::fautMine(UNIT_TYPEID cible) {
+	if (cible == UNIT_TYPEID::ZERG_ZERGLING || cible == UNIT_TYPEID::ZERG_QUEEN || cible == UNIT_TYPEID::ZERG_ROACH || cible == UNIT_TYPEID::ZERG_DRONE) {
+		return true;
+	}
+	return false;
+}
 bool Bot::estDevant(Unit unit) {
 	Point2D ennemy = getNearestEnnemy(locatePack()).pos;
 	int nbUnitPlusProche = 0;
@@ -33,8 +56,11 @@ Point2D Bot::locatePack() {
 	return posPack / faucheur.size();
 }
 void Bot::goWithPack(Unit reaper) {
+	if (faucheur.size() == 0) {
+		faucheur.push_front(reaper);
+	}
 	Actions()->UnitCommand(reaper, ABILITY_ID::MOVE, locatePack());
-	if (Distance2D(reaper.pos, locatePack()) < 5 && Distance2D(getB1().pos, locatePack())> 10) {
+	if (Distance2D(reaper.pos, locatePack()) < 5) {
 		faucheur.push_back(reaper);
 		faucheur.sort();
 		faucheur.unique();
@@ -56,59 +82,57 @@ void Bot::updatePack() {
 	faucheur.clear();
 	faucheur = tmpfo;
 }
-
-void Bot::micro() {
+Unit Bot::nearestFromEnnemyBase() {
+	float dmax = std::numeric_limits<float>::max();
+	Unit lePlusPres;
+	for (Unit reaper : getAll(UNIT_TYPEID::TERRAN_REAPER)) {
+		if (Distance2D(reaper.pos, baseEnnemie()) < dmax) {
+			lePlusPres = reaper;
+		}
+	}
+	return lePlusPres;
+}
+void Bot::microReaper() {
 	Point2D lesVcs = (baseEnnemie() + 2 * getNearest(baseEnnemie(), UNIT_TYPEID::NEUTRAL_MINERALFIELD).pos) / 3;
-	for (Unit reaper : Observation()->GetUnits(Unit::Alliance::Self, IsUnit(UNIT_TYPEID::TERRAN_REAPER))) {
-		if (Distance2D(getB1().pos, reaper.pos) < 15 && faucheur.size() == 0) {
-			attack(reaper);
-		}
-		else if (faucheur.size() == 0 && Distance2D(getB1().pos, reaper.pos)> 25) {
-			faucheur.push_back(reaper);
-		}
-		else if (!isWithPack(reaper)) {
+	Unit chef = nearestFromEnnemyBase();
+	for (Unit reaper : getAll(UNIT_TYPEID::TERRAN_REAPER)) {
+		if (!(isWithPack(reaper))) {
 			goWithPack(reaper);
 		}
 	}
-	if (faucheur.size() < PACK_MIN)
-	{
-		orderPack(ABILITY_ID::ATTACK, locatePack());;
-	}
-	else
-	{
-		orderPack(ABILITY_ID::ATTACK, lesVcs);
-	}
 	for (Unit reaper : faucheur) {
-		Units ttlesreaper = Observation()->GetUnits(Unit::Alliance::Self, IsUnit(UNIT_TYPEID::TERRAN_REAPER));
-		if (std::find(ttlesreaper.begin(), ttlesreaper.end(), reaper) == ttlesreaper.end()) {
-			faucheur.remove(reaper);
-			break;
+		if (faucheur.size() <= REAPERPACKMIN){
+			if (reaper.health < REAPERHPFUITE || isBeingSurrounded(reaper)) {
+				Actions()->UnitCommand(reaper, ABILITY_ID::MOVE, getB1().pos);
+				std::cout << "fuite" << std::endl;
+			}
+			else {
+				attack(reaper);
+				std::cout << "attack" << std::endl;
+			}
 		}
-		if (fautMine(getNearestEnnemy(reaper.pos).unit_type)) {
-			Actions()->UnitCommand(reaper, ABILITY_ID::EFFECT_KD8CHARGE, getNearestEnnemy(reaper.pos).tag);
+		else {
+			if (estDevant(reaper) && reaper.health < REAPERHPFUITE) {
+				Actions()->UnitCommand(reaper, ABILITY_ID::MOVE, getB1().pos);
+			}
+			else if (attackBuilding(reaper)) {
+				Actions()->UnitCommand(reaper, ABILITY_ID::MOVE, lesVcs);
+			}
+			else {
+				attack(reaper);
+				if (fautMine(getNearestEnnemy(reaper.pos).unit_type)) {
+					Actions()->UnitCommand(reaper, ABILITY_ID::EFFECT_KD8CHARGE, getNearestEnnemy(reaper.pos).pos);
+				}
+			}
 		}
-		if (reaper.health < 0.7* averageHealt() && estDevant(reaper) && faucheur.size() >= PACK_MIN - 1) {
-			Actions()->UnitCommand(reaper, ABILITY_ID::MOVE, getB1().pos);
-		}
-		else if (Distance2D(reaper.pos, getNearestEnnemy(reaper.pos).pos) > 4.5 && Distance2D(reaper.pos, getNearestEnnemy(reaper.pos).pos) < 5.5) {
-			Actions()->UnitCommand(reaper, ABILITY_ID::MOVE, lesVcs);
-		}
-
 	}
-	if (faucheur.size() != 0 && averageHealt() / faucheur.front().health_max < 0.3) {
+	if (averageHealt(faucheur) < REAPERHPFUITE) {
 		orderPack(ABILITY_ID::MOVE, getB1().pos);
 	}
 	updatePack();
 }
-bool Bot::fautMine(UNIT_TYPEID cible) {
-	if (cible == UNIT_TYPEID::ZERG_ZERGLING || cible == UNIT_TYPEID::ZERG_QUEEN || cible == UNIT_TYPEID::ZERG_ROACH || cible == UNIT_TYPEID::ZERG_DRONE) {
-		return true;
-	}
-	return false;
-}
 
 /*Banshee*/
-
 bool Bot::estMenace(Unit banshee) {
 	return false;
 }
@@ -126,7 +150,7 @@ void Bot::microBanshee() {
 		if (banshee.cloak == Unit::CloakState::CloakedDetected && estMenace(banshee)) {
 			runFromDetection(banshee);
 		}
-		else if (banshee.energy > 20 && peutCloak(banshee) && (banshee.cloak == Unit::CloakState::Cloaked || banshee.cloak == Unit::CloakState::CloakedDetected)) {
+		else if (banshee.energy > BANSHEEENOUGHENERGY && peutCloak(banshee) && (banshee.cloak == Unit::CloakState::Cloaked || banshee.cloak == Unit::CloakState::CloakedDetected)) {
 			pwnVcs(banshee);
 		}
 		else if (estMenace(banshee) && banshee.cloak == Unit::CloakState::NotCloaked && banshee.energy > 50) {

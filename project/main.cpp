@@ -3,7 +3,7 @@
 //#include "botmain.cpp"
 using namespace sc2;
 
-#define TRUESPEED true
+#define TRUESPEED false
 
 int main(int argc, char* argv[]) {
 	std::cout << "Initialisation" << std::endl;

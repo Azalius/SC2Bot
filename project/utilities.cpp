@@ -10,24 +10,22 @@ Point2D Bot::baseEnnemie() {
 	const GameInfo& game_info = Observation()->GetGameInfo();
 	return game_info.enemy_start_locations.front();
 }
-float Bot::averageHealt() { // TODO sur un array de unit
+float Bot::averageHealt(const std::list<Unit> liste) {
 	float health = 0;
-	for (Unit reaper : faucheur) {
+	for (Unit reaper : liste) {
 		health += reaper.health;
 	}
-	return health / faucheur.size();
+	return health / liste.size();
 }
-void Bot::attack(Unit unit) {
-		//if (unit.weapon_cooldown == 0.0)
+void Bot::attack(Unit unit) { //TODO hit&run
 		Actions()->UnitCommand(unit, ABILITY_ID::ATTACK, baseEnnemie());
-		//else { Actions()->UnitCommand(unit, ABILITY_ID::MOVE, getB1()); }
 	}
 Unit Bot::getB1() {
 	for (Unit base : Observation()->GetUnits(Unit::Alliance::Self, IsUnit(UNIT_TYPEID::TERRAN_COMMANDCENTER))) {
 		return base;
 	}
 }
-bool Bot::estBatiment(UNIT_TYPEID bat) {
+bool Bot::estBatiment(UNIT_TYPEID bat) {//IMPROVE
 	if (bat == UNIT_TYPEID::ZERG_ROACHWARREN || bat == UNIT_TYPEID::ZERG_HATCHERY || bat == UNIT_TYPEID::ZERG_SPAWNINGPOOL) {
 		return true;
 	}
@@ -75,13 +73,27 @@ Unit Bot::getNearestEnnemy(Point2D unite) {
 	}
 	return proche;
 }
-float Bot::attackrange(Unit unit) {
+float Bot::attackrange(Unit unit) { // TODO
 	return 5;
 }
 bool Bot::isPeonBusy(Tag tag) {
+	if (vcsKiBossent.count(tag) != 0) {
+		return true;
+	}
 	if (Observation()->GetUnit(tag)->orders.size() == 0) {
 		return false;
 	}
 	std::string cible = Observation()->GetUnit(tag)->orders.front().ability_id.to_string();
-	return vcsKiBossent.count(tag) == 0 && (cible != "3666" && cible != "3667");
+	return vcsKiBossent.count(tag) == 0 && (cible != NOTIMPORTANTORDERS1 && cible != NOTIMPORTANTORDERS2);
+}
+Unit Bot::getUnit(Tag tag) {
+	const Unit *cepeon;
+	cepeon = Observation()->GetUnit(tag);
+	return *cepeon;
+}
+Units Bot::getAll(UNIT_TYPEID unit) {
+	return Observation()->GetUnits(Unit::Alliance::Self, IsUnit(unit));
+}
+bool Bot::attackBuilding(Unit unit) { //TODO
+	return false;
 }
