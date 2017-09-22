@@ -4,6 +4,14 @@
 using namespace sc2;
 
 /*All*/
+void Bot::vaMiner(Unit peon) {
+	for (Unit cc : getAll(UnitGroup::COMMANDCENTER)) {// TODO IMPROVE
+		if (cc.ideal_harvesters - cc.assigned_harvesters < 0) {
+			Actions()->UnitCommand(peon, ABILITY_ID::SMART, getNearest(cc.pos, UNIT_TYPEID::NEUTRAL_MINERALFIELD));
+			return;
+		}
+	}
+}
 void Bot::micro() {
 	microReaper();
 	microBanshee();

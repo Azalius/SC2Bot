@@ -135,6 +135,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="micro.cpp" />
     <ClCompile Include="utilities.cpp" />
+    <ClCompile Include="vcs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="botHeader.h" />

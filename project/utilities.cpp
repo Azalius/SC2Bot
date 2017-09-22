@@ -94,6 +94,29 @@ Unit Bot::getUnit(Tag tag) {
 Units Bot::getAll(UNIT_TYPEID unit) {
 	return Observation()->GetUnits(Unit::Alliance::Self, IsUnit(unit));
 }
+Units Bot::getAll(UnitGroup gr) {
+	Units allUnits;
+	if (gr = UnitGroup::COMMANDCENTER) {
+		for (Unit cc : getAll(UNIT_TYPEID::TERRAN_COMMANDCENTER)) { // TODO somtimes PF
+			allUnits.push_back(cc);
+		}
+		for (Unit cc : getAll(UNIT_TYPEID::TERRAN_ORBITALCOMMAND)) {
+			allUnits.push_back(cc);
+		}
+		for (Unit cc : getAll(UNIT_TYPEID::TERRAN_PLANETARYFORTRESS)) {
+			allUnits.push_back(cc);
+		}
+	}
+
+	return allUnits;
+}
 bool Bot::attackBuilding(Unit unit) { //TODO
 	return false;
+}
+Unit Bot::getPeonFromCc(Unit cc) { // TODO
+	Unit peon;
+	do {
+		peon = trouveUnPeon(UNIT_TYPEID::TERRAN_SCV);
+	} while (Distance2D(cc.pos, peon.pos) > DISTANCEPEONCC);
+	return peon;
 }

@@ -33,6 +33,9 @@
     <ClCompile Include="macroRessources.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="vcs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="botHeader.h">

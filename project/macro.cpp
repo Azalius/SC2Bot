@@ -23,19 +23,19 @@ void Bot::macro() {
 }
 void Bot::macroEco() {
 	if (makeMorePeon()) {
-		for (Unit cc : getAll(UNIT_TYPEID::TERRAN_COMMANDCENTER)) { // TODO somtimes PF
-			if (cc.orders.size() == 0) {
-				Actions()->UnitCommand(cc, ABILITY_ID::TRAIN_SCV);
-			}
-		}
-		for (Unit cc : getAll(UNIT_TYPEID::TERRAN_ORBITALCOMMAND)) {
+		for (Unit cc : getAll(UnitGroup::COMMANDCENTER)) { 
 			if (cc.orders.size() == 0) {
 				Actions()->UnitCommand(cc, ABILITY_ID::TRAIN_SCV);
 			}
 		}
 	}
 	for (Unit cc : getAll(UNIT_TYPEID::TERRAN_COMMANDCENTER)) {
-		Actions()->UnitCommand(cc, ABILITY_ID::MORPH_ORBITALCOMMAND); // TODO somtimes PF
+		Actions()->UnitCommand(cc, ABILITY_ID::MORPH_ORBITALCOMMAND);     
+	}
+	for (Unit cc : getAll(UnitGroup::COMMANDCENTER)) {
+		if (cc.ideal_harvesters - cc.assigned_harvesters > 0) {
+			vaMiner(getPeonFromCc(cc));
+		}
 	}
 }
 void Bot::macroSupply() {//TODO

@@ -18,6 +18,9 @@
 #define LIMITEDISTACEBUILD 10
 #define REAPERPACKMIN 3
 #define NBUNITTOBESURROUNDED 4
+#define DISTANCEPEONCC 5
+
+enum UnitGroup { COMMANDCENTER, BATIMENT };
 
 using namespace sc2;
 
@@ -57,6 +60,8 @@ private:
 	Unit nearestFromEnnemyBase();
 	Point2D baseEnnemie();
 	float averageHealt(const std::list<Unit> liste);
+	void vaMiner(Unit peon);
+	Unit getPeonFromCc(Unit cc);
 	void micro();
 	int nbEnnemyNear(Unit unit, float distance);
 	bool isBeingSurrounded(Unit unit);
@@ -83,6 +88,7 @@ private:
 	bool isPeonBusy(Tag tag);
 	Unit getUnit(Tag tag);
 	Units getAll(UNIT_TYPEID unit);
+	Units getAll(UnitGroup gr);
 	bool attackBuilding(Unit unit);
 };
 
