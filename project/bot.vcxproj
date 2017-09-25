@@ -134,6 +134,7 @@
     <ClCompile Include="macroRessources.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="micro.cpp" />
+    <ClCompile Include="oponent.cpp" />
     <ClCompile Include="utilities.cpp" />
     <ClCompile Include="vcs.cpp" />
   </ItemGroup>

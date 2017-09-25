@@ -4,7 +4,13 @@
 using namespace sc2;
 
 int Bot::CountUnitType(UNIT_TYPEID unit_type) {
-	return Observation()->GetUnits(Unit::Alliance::Self, IsUnit(unit_type)).size();
+	int nbunit = 0;
+	for (Unit unit : getAll(unit_type)) {
+		if (unit.build_progress == 1.0) {
+			nbunit++;
+		}
+	}
+	return nbunit;
 }
 Point2D Bot::baseEnnemie() {
 	const GameInfo& game_info = Observation()->GetGameInfo();
@@ -73,6 +79,21 @@ Unit Bot::getNearestEnnemy(Point2D unite) {
 	}
 	return proche;
 }
+Unit Bot::getNearestEnnemy(Point2D unite, UNIT_TYPEID type) {
+	Unit proche;
+	Units units = Observation()->GetUnits();
+	float distance = std::numeric_limits<float>::max();
+	for (const auto& u : units) {
+		if (u.alliance == Unit::Alliance::Enemy && u.unit_type == type) {
+			float d = DistanceSquared2D(unite, u.pos);
+			if (d < distance) {
+				distance = d;
+				proche = u;
+			}
+		}
+	}
+	return proche;
+}
 float Bot::attackrange(Unit unit) { // TODO
 	return 5;
 }
@@ -96,8 +117,8 @@ Units Bot::getAll(UNIT_TYPEID unit) {
 }
 Units Bot::getAll(UnitGroup gr) {
 	Units allUnits;
-	if (gr = UnitGroup::COMMANDCENTER) {
-		for (Unit cc : getAll(UNIT_TYPEID::TERRAN_COMMANDCENTER)) { // TODO somtimes PF
+	if (gr == UnitGroup::COMMANDCENTER) {
+		for (Unit cc : getAll(UNIT_TYPEID::TERRAN_COMMANDCENTER)) { 
 			allUnits.push_back(cc);
 		}
 		for (Unit cc : getAll(UNIT_TYPEID::TERRAN_ORBITALCOMMAND)) {
@@ -107,7 +128,6 @@ Units Bot::getAll(UnitGroup gr) {
 			allUnits.push_back(cc);
 		}
 	}
-
 	return allUnits;
 }
 bool Bot::attackBuilding(Unit unit) { //TODO
@@ -115,8 +135,10 @@ bool Bot::attackBuilding(Unit unit) { //TODO
 }
 Unit Bot::getPeonFromCc(Unit cc) { // TODO
 	Unit peon;
+	float i = 0;
 	do {
 		peon = trouveUnPeon(UNIT_TYPEID::TERRAN_SCV);
-	} while (Distance2D(cc.pos, peon.pos) > DISTANCEPEONCC);
+		i += DISTANCEPEONCCREDUCTION;
+	} while (Distance2D(cc.pos, peon.pos) > DISTANCEPEONCC - i);
 	return peon;
 }

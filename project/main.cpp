@@ -7,6 +7,9 @@ using namespace sc2;
 
 int main(int argc, char* argv[]) {
 	std::cout << "Initialisation" << std::endl;
+	for (int i = 0; i < argc; i++) {
+		std::cout << argv[i] << std::endl;
+	}
 	Coordinator coordinator;
 	coordinator.LoadSettings(argc, argv);
 	coordinator.SetRealtime(TRUESPEED);

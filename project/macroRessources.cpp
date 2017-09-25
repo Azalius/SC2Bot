@@ -3,18 +3,7 @@
 
 using namespace sc2;
 
-Unit Bot::trouveUnPeon(UNIT_TYPEID peon = UNIT_TYPEID::TERRAN_SCV) {
-	Units toute = Observation()->GetUnits(Unit::Alliance::Self, IsUnit(peon));
-	for (Unit peon : toute) {
-		if (!isPeonBusy(peon.tag)) {
-			return peon;
-		}
-	}
-}
-void Bot::addGaz(Unit peon) {
-	Unit gazToAdd = getNearest(peon.pos, UNIT_TYPEID::NEUTRAL_VESPENEGEYSER);
-	Actions()->UnitCommand(peon, ABILITY_ID::BUILD_REFINERY, gazToAdd);
-}
+
 int Bot::isBuilding(UNIT_TYPEID unit = UNIT_TYPEID::TERRAN_BARRACKS) {
 	int nbBat = 0;
 	Units toute = Observation()->GetUnits(Unit::Alliance::Self, IsUnit(unit));
@@ -27,8 +16,7 @@ int Bot::isBuilding(UNIT_TYPEID unit = UNIT_TYPEID::TERRAN_BARRACKS) {
 }
 int Bot::SupBuilding() {
 	int nbBat = 0;
-	Units vcs = Observation()->GetUnits(Unit::Alliance::Self, IsUnit(UNIT_TYPEID::TERRAN_SCV));
-	for (Unit peon : vcs) {
+	for (Unit peon : getAll(UNIT_TYPEID::TERRAN_SCV)) {
 		for (UnitOrder ordre : peon.orders) {
 			if (ordre.ability_id == ABILITY_ID::BUILD_SUPPLYDEPOT) {
 				nbBat++;
@@ -113,35 +101,6 @@ Point2D Bot::trouveOuConstruire(ABILITY_ID bat, Unit vcs) {
 		return laQueJeConstrui;
 	}
 }
-void Bot::batBuildVcs() {
-	if (!fileAttBat.empty() && vcsWantBuild == 0 && Observation()->GetMinerals() > nbMineralsBougerVcs(fileAttBat.front())) {
-		vcsWantBuild++;
-		Unit vcs = trouveUnPeon();
-		Actions()->UnitCommand(vcs, ABILITY_ID::MOVE, trouveOuConstruire(fileAttBat.front(), vcs));
-		vcsKiBossent[vcs.tag] = fileAttBat.front();
-		fileAttBat.pop();
-	}
-}
-void Bot::batBuildDo() {
-	for (Tag bran : branleur) {
-		vcsKiBossent.erase(bran);
-	}
-	branleur.clear();
-	for (auto& vcs : vcsKiBossent) {
-		if (Observation()->GetUnit(vcs.first) != 0 && Observation()->GetUnit(vcs.first)->orders.empty()) {
-			if (vcs.second == ABILITY_ID::BUILD_REFINERY) {
-				addGaz(getUnit(vcs.first));
-			}
-			else {
-				Actions()->UnitCommand(vcs.first, vcs.second, Observation()->GetUnit(vcs.first)->pos);
-			}
-		}
-		else if (Observation()->GetUnit(vcs.first) != 0 && Observation()->GetUnit(vcs.first)->orders.front().ability_id == vcs.second) {
-			branleur.push_front(vcs.first);
-			vcsWantBuild--;
-		}
-	}
-}
 int Bot::nbMineralsBougerVcs(ABILITY_ID bat) {
 	if (bat == ABILITY_ID::BUILD_REFINERY) {
 		return 50;
@@ -155,5 +114,33 @@ int Bot::nbMineralsBougerVcs(ABILITY_ID bat) {
 	return 100;
 }
 bool Bot::makeMorePeon() { //TODO
-	return getAll(UNIT_TYPEID::TERRAN_BARRACKS).size() == 0 || getAll(UNIT_TYPEID::TERRAN_COMMANDCENTER).size() == 0;
+	return getAll(UNIT_TYPEID::TERRAN_BARRACKS).size() == 0 || getAll(UNIT_TYPEID::TERRAN_COMMANDCENTER).size() == 0 || CountUnitType(UNIT_TYPEID::TERRAN_SCV) <= 12;
+}
+void Bot::addBuilding(ABILITY_ID tobuild) {
+	fileAttBat.push_front(tobuild);
+}
+int Bot::nbBatEnConstr(ABILITY_ID bat) {
+	int nbBat = 0;
+	if (fileAttBat.front() == bat) {
+		nbBat++;
+	}
+	for (const auto& kv : vcsKiBossent) {
+		if (kv.second == bat) {
+			nbBat++;
+		}
+	}
+	return nbBat;
+}
+void Bot::dropMule(Unit cc) { 
+	int maxMinerals = INT_MIN;
+	Unit mineToDrop;
+	for (Unit mine : getAll(UNIT_TYPEID::NEUTRAL_MINERALFIELD)) {
+		if (Distance2D(mine.pos, getNearest(mine.pos, UNIT_TYPEID::TERRAN_COMMANDCENTER).pos) < DISTANCEMAXMINERALSCC ){			//TODO for all types of cc
+			if (mine.mineral_contents > maxMinerals) {
+				maxMinerals = mine.mineral_contents;
+				mineToDrop = mine;
+			}
+		}
+	}
+	Actions()->UnitCommand(cc, ABILITY_ID::EFFECT_CALLDOWNMULE, mineToDrop);
 }

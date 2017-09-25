@@ -36,6 +36,9 @@
     <ClCompile Include="vcs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="oponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="botHeader.h">

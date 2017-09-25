@@ -65,7 +65,7 @@ Point2D Bot::locatePack() {
 }
 void Bot::goWithPack(Unit reaper) {
 	if (faucheur.size() == 0) {
-		faucheur.push_front(reaper);
+		faucheur.push_back(reaper);
 	}
 	Actions()->UnitCommand(reaper, ABILITY_ID::MOVE, locatePack());
 	if (Distance2D(reaper.pos, locatePack()) < 5) {
@@ -112,11 +112,9 @@ void Bot::microReaper() {
 		if (faucheur.size() <= REAPERPACKMIN){
 			if (reaper.health < REAPERHPFUITE || isBeingSurrounded(reaper)) {
 				Actions()->UnitCommand(reaper, ABILITY_ID::MOVE, getB1().pos);
-				std::cout << "fuite" << std::endl;
 			}
 			else {
 				attack(reaper);
-				std::cout << "attack" << std::endl;
 			}
 		}
 		else {

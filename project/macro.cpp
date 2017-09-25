@@ -4,15 +4,15 @@
 using namespace sc2;
 
 void Bot::BO() {
-	fileAttBat.push(ABILITY_ID::BUILD_SUPPLYDEPOT);
-	fileAttBat.push(ABILITY_ID::BUILD_REFINERY);
-	fileAttBat.push(ABILITY_ID::BUILD_BARRACKS);
-	fileAttBat.push(ABILITY_ID::BUILD_BARRACKS);
-	fileAttBat.push(ABILITY_ID::BUILD_BARRACKS);
-	fileAttBat.push(ABILITY_ID::BUILD_REFINERY);
-	fileAttBat.push(ABILITY_ID::BUILD_FACTORY);
-	fileAttBat.push(ABILITY_ID::BUILD_COMMANDCENTER);
-	fileAttBat.push(ABILITY_ID::BUILD_STARPORT);
+	fileAttBat.push_back(ABILITY_ID::BUILD_SUPPLYDEPOT);
+	fileAttBat.push_back(ABILITY_ID::BUILD_REFINERY);
+	fileAttBat.push_back(ABILITY_ID::BUILD_BARRACKS);
+	fileAttBat.push_back(ABILITY_ID::BUILD_BARRACKS);
+	fileAttBat.push_back(ABILITY_ID::BUILD_BARRACKS);
+	fileAttBat.push_back(ABILITY_ID::BUILD_REFINERY);
+	fileAttBat.push_back(ABILITY_ID::BUILD_FACTORY);
+	fileAttBat.push_back(ABILITY_ID::BUILD_COMMANDCENTER);
+	fileAttBat.push_back(ABILITY_ID::BUILD_STARPORT);
 }
 void Bot::macro() {
 	macroEco();
@@ -24,25 +24,29 @@ void Bot::macro() {
 void Bot::macroEco() {
 	if (makeMorePeon()) {
 		for (Unit cc : getAll(UnitGroup::COMMANDCENTER)) { 
-			if (cc.orders.size() == 0) {
+			if (cc.orders.size() == 0 && (cc.unit_type != UNIT_TYPEID::TERRAN_COMMANDCENTER || Observation()->GetMinerals() < 150)) {
 				Actions()->UnitCommand(cc, ABILITY_ID::TRAIN_SCV);
 			}
 		}
 	}
-	for (Unit cc : getAll(UNIT_TYPEID::TERRAN_COMMANDCENTER)) {
-		Actions()->UnitCommand(cc, ABILITY_ID::MORPH_ORBITALCOMMAND);     
-	}
 	for (Unit cc : getAll(UnitGroup::COMMANDCENTER)) {
-		if (cc.ideal_harvesters - cc.assigned_harvesters > 0) {
+		if (cc.ideal_harvesters - cc.assigned_harvesters < 0) {
 			vaMiner(getPeonFromCc(cc));
+		}
+		if (cc.unit_type == UNIT_TYPEID::TERRAN_COMMANDCENTER && Observation()->GetMinerals() >= 150) {
+			Actions()->UnitCommand(cc, ABILITY_ID::MORPH_ORBITALCOMMAND);
+		}
+	}
+	for (Unit cc : getAll(UNIT_TYPEID::TERRAN_ORBITALCOMMAND)) {
+		if (!(detectionNeeded())) {
+			dropMule(cc);
 		}
 	}
 }
 void Bot::macroSupply() {//TODO
-	/*if (Observation()->GetFoodCap() - Observation()->GetFoodUsed() >= 4) {
-		Unit peon = trouveUnPeon(UNIT_TYPEID::TERRAN_SCV);
-		Actions()->UnitCommand(peon, ABILITY_ID::BUILD_SUPPLYDEPOT, trouveOuConstruire(ABILITY_ID::BUILD_SUPPLYDEPOT, peon));
-	}*/
+	if (Observation()->GetFoodCap() - Observation()->GetFoodUsed() <= FOODDIFFERENCETOADDSUP && nbBatEnConstr(ABILITY_ID::BUILD_SUPPLYDEPOT) == 0 && CountUnitType(UNIT_TYPEID::TERRAN_SUPPLYDEPOT) >= 1 && getAll(UNIT_TYPEID::TERRAN_SUPPLYDEPOT).front().build_progress == 1) {
+		addBuilding(ABILITY_ID::BUILD_SUPPLYDEPOT);
+	}
 }
 void Bot::macroBat() {
 	if (Observation()->GetUnits(Unit::Alliance::Self, IsUnit(UNIT_TYPEID::TERRAN_FACTORY)).size() != 0 && Observation()->GetUnits(Unit::Alliance::Self, IsUnit(UNIT_TYPEID::TERRAN_FACTORY)).front().build_progress == 1.0) {
