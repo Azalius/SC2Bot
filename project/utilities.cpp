@@ -142,3 +142,6 @@ Unit Bot::getPeonFromCc(Unit cc) { // TODO
 	} while (Distance2D(cc.pos, peon.pos) > DISTANCEPEONCC - i);
 	return peon;
 }
+bool Bot::AttackFlying(UNIT_TYPEID type) {
+	return true;
+}

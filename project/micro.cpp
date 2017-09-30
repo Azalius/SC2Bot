@@ -16,6 +16,17 @@ void Bot::micro() {
 	microReaper();
 	microBanshee();
 }
+void Bot::fleefrom(Unit enfuite, Point2D afuire) {
+	const float distance = 10.0;
+	Point2D whereto;
+	float coef = 1.0;
+	float a, b; // ax+b equation
+	a = (afuire.y - enfuite.pos.y) / (afuire.y - enfuite.pos.y);
+	b = afuire.y - a * afuire.x;
+	whereto.x = enfuite.pos.x + coef;
+	whereto.y = enfuite.pos.y + coef * a;
+	Actions()->UnitCommand()
+}
 int Bot::nbEnnemyNear(Unit unit, float distancemax) {
 	int nbEnn = 0;
 	for (Unit unite : Observation()->GetUnits(Unit::Alliance::Enemy)) {
@@ -139,11 +150,17 @@ void Bot::microReaper() {
 }
 
 /*Banshee*/
-bool Bot::estMenace(Unit banshee) {
-	return false;
+bool Bot::estMenace(Unit banshee) { //TODO improve close to no energy, detector near...
+	bool isVisible;
+	bool isDanger;
+	isVisible = banshee.cloak == Unit::CloakedDetected || banshee.cloak == Unit::NotCloaked;
+	for (Unit ennemy : Observation()->GetUnits(Unit::Alliance::Enemy)) {
+		isDanger = (isDanger = false && Distance2D(banshee.pos, ennemy.pos) < attackrange(ennemy) + 1 && AttackFlying(ennemy.unit_type));
+	}
+	return isVisible && isDanger;
 }
 void Bot::runFromDetection(Unit banshee) {
-
+	fleefrom(banshee, getNearestEnnemy(banshee.pos))
 }
 bool Bot::peutCloak(Unit banshee) {
 	return banshee.energy > 10;

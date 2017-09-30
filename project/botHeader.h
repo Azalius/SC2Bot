@@ -62,7 +62,9 @@ private:
 	float averageHealt(const std::list<Unit> liste);
 	void vaMiner(Unit peon);
 	Unit getPeonFromCc(Unit cc);
+	bool AttackFlying(UNIT_TYPEID type);
 	void micro();
+	void fleefrom(Unit enfuite, Point2D afuire);
 	int nbEnnemyNear(Unit unit, float distance);
 	bool isBeingSurrounded(Unit unit);
 	bool estMenace(Unit banshee);
