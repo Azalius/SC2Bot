@@ -3,5 +3,6 @@
 using namespace sc2;
 
 bool Bot::detectionNeeded() {//TODO
-	return false;
+	bool dueToTime = Observation()->GetGameLoop() < SECPERLOOP * NBSECDETECTIONNEEDED;
+	return dueToTime;
 }

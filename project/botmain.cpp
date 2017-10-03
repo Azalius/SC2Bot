@@ -8,7 +8,7 @@ using namespace sc2;
     void Bot::OnStep()  {
 		for (Unit unite : Observation()->GetUnits(Unit::Alliance::Self)) {
 			if (unite.is_selected) {
-				//std::cout << Observation()->GetFoodCap() << std::endl;
+				fleefrom(unite, getB1().pos);
 			}
 		}
 		batBuildVcs();
